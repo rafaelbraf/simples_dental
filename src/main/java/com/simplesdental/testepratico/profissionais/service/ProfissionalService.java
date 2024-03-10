@@ -2,6 +2,7 @@ package com.simplesdental.testepratico.profissionais.service;
 
 import com.simplesdental.testepratico.profissionais.model.Profissional;
 import com.simplesdental.testepratico.profissionais.repository.ProfissionalRepository;
+import com.simplesdental.testepratico.profissionais.utils.FilterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +16,12 @@ import static java.util.Objects.isNull;
 public class ProfissionalService {
 
     private final ProfissionalRepository profissionalRepository;
+    private final FilterUtils<Profissional> filterUtils;
 
     @Autowired
-    public ProfissionalService(ProfissionalRepository profissionalRepository) {
+    public ProfissionalService(ProfissionalRepository profissionalRepository, FilterUtils<Profissional> filterUtils) {
         this.profissionalRepository = profissionalRepository;
+        this.filterUtils = filterUtils;
     }
 
     public List<Profissional> searchAndFilterProfissionais(String query, List<String> fields) {
@@ -26,7 +29,7 @@ public class ProfissionalService {
         profissionais = filterProfissionaisByQuery(profissionais, query);
 
         if (!fields.isEmpty()) {
-            profissionais = filterFields(profissionais, fields);
+            profissionais = filterUtils.filterFields(profissionais, fields);
         }
 
         return profissionais;
@@ -68,31 +71,6 @@ public class ProfissionalService {
 
     public boolean existsById(Long id) {
         return profissionalRepository.existsById(id);
-    }
-
-    private List<Profissional> filterFields(List<Profissional> profissionais, List<String> fields) {
-        return profissionais.stream()
-                .map(profissional -> profissionalWithFieldsFiltered(profissional, fields))
-                .collect(Collectors.toList());
-    }
-
-    private Profissional profissionalWithFieldsFiltered(Profissional profissional, List<String> fields) {
-        var profissionalComCamposFiltrados = Profissional.builder().build();
-        Class<?> profissionalClass = Profissional.class;
-
-        fields.forEach(field -> {
-            try {
-                var fieldClass = profissionalClass.getDeclaredField(field);
-                fieldClass.setAccessible(true);
-
-                Object value = fieldClass.get(profissional);
-                fieldClass.set(profissionalComCamposFiltrados, value);
-            } catch (NoSuchFieldException | IllegalAccessException e){
-                throw new RuntimeException(e);
-            }
-        });
-
-        return profissionalComCamposFiltrados;
     }
 
     private List<Profissional> filterProfissionaisByQuery(List<Profissional> profissionais, String query) {
