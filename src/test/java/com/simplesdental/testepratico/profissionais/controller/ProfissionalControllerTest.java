@@ -14,7 +14,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,12 +33,45 @@ class ProfissionalControllerTest {
                 buildProfissional(2L, "Profissional Teste 2", Cargo.DESIGNER, new Date(), new Date(), true)
         );
 
-        when(profissionalService.getAll()).thenReturn(profissionaisMock);
+        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(profissionaisMock);
 
-        var response = profissionalController.getAll("teste", null);
+        var response = profissionalController.getAll("", Collections.emptyList());
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(profissionaisMock.size(), response.getBody().size());
+    }
+
+    @Test
+    void testGetComFiltro() {
+        var profissional1 = buildProfissional(1L, "Profissional Teste 1", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
+
+        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissional1));
+
+        var response = profissionalController.getAll("desenvolvedor", Collections.emptyList());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(profissional1.getId(), response.getBody().get(0).getId());
+    }
+
+    @Test
+    void testGetComFieldsEscolhidos() {
+        var profissional = Profissional.builder()
+                .nome("Profissional Teste")
+                .nascimento(new Date())
+                .build();
+
+        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissional));
+
+        var response = profissionalController.getAll("", List.of("nome", "nascimento"));
+        var profissionalResponse = response.getBody().get(0);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(profissional.getNome(), profissionalResponse.getNome());
+        assertEquals(profissional.getNascimento(), profissionalResponse.getNascimento());
+        assertNull(profissionalResponse.getId());
+        assertNull(profissionalResponse.getCargo());
+        assertNull(profissionalResponse.getCreatedDate());
+        assertNull(profissionalResponse.getContatos());
     }
 
     @Test

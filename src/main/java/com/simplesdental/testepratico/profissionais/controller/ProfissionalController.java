@@ -22,9 +22,8 @@ public class ProfissionalController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Profissional>> getAll(@RequestParam String q, @RequestParam(required = false) List<List<String>> fields) {
-        var profissionais = profissionalService.getAll();
-
+    public ResponseEntity<List<Profissional>> getAll(@RequestParam String q, @RequestParam(required = false) List<String> fields) {
+        var profissionais = profissionalService.searchAndFilterProfissionais(q, fields);
         return ResponseEntity.ok(profissionais);
     }
 
