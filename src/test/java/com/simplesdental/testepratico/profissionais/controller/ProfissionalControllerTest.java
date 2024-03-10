@@ -1,5 +1,6 @@
 package com.simplesdental.testepratico.profissionais.controller;
 
+import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
 import com.simplesdental.testepratico.profissionais.model.Cargo;
 import com.simplesdental.testepratico.profissionais.model.Profissional;
 import com.simplesdental.testepratico.profissionais.service.ProfissionalService;
@@ -12,8 +13,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -89,10 +89,7 @@ class ProfissionalControllerTest {
 
     @Test
     void testGetById_ProfissionalNaoEncontrado() {
-        var response = profissionalController.getById(1L);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> profissionalController.getById(1L));
     }
 
     @Test

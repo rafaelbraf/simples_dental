@@ -1,8 +1,10 @@
 package com.simplesdental.testepratico.profissionais.controller;
 
+import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
 import com.simplesdental.testepratico.profissionais.model.Profissional;
 import com.simplesdental.testepratico.profissionais.service.ProfissionalService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,30 +33,42 @@ public class ProfissionalController {
     public ResponseEntity<Profissional> getById(@PathVariable Long id) {
         return profissionalService.getById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> ResourceNotFoundException.forResource("Profissional", id));
     }
 
     @PostMapping
     public ResponseEntity<String> insert(@RequestBody Profissional profissional) {
-        var profissionalCadastrado = profissionalService.insert(profissional);
-        var mensagem = String.format("Sucesso profissional com id %s cadastrado", profissionalCadastrado.getId());
+        try {
+            var profissionalCadastrado = profissionalService.insert(profissional);
+            var mensagem = String.format("Sucesso profissional com id %s cadastrado", profissionalCadastrado.getId());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
+            return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody Profissional profissional) {
         if (!profissionalService.existsById(id)) {
-            return ResponseEntity.notFound().build();
+            throw ResourceNotFoundException.forResource("Profissional", id);
         }
 
-        profissionalService.update(id, profissional);
-        return ResponseEntity.ok(Map.of("mensagem", "Profissional atualizado com sucesso!"));
+        try {
+            profissionalService.update(id, profissional);
+            return ResponseEntity.ok(Map.of("mensagem", "Profissional atualizado com sucesso!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
-        profissionalService.delete(id);
-        return ResponseEntity.ok(Map.of("mensagem", "Sucesso profissional excluído"));
+        try {
+            profissionalService.delete(id);
+            return ResponseEntity.ok(Map.of("mensagem", "Sucesso profissional excluído"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
