@@ -27,7 +27,7 @@ class ProfissionalControllerTest {
     ProfissionalService profissionalService;
 
     @Test
-    void testGetAll() {
+    void testGetAllProfissionais() {
         var profissionaisMock = Arrays.asList(
                 buildProfissional(1L, "Profissional Teste 1", Cargo.DESENVOLVEDOR, new Date(), new Date(), true),
                 buildProfissional(2L, "Profissional Teste 2", Cargo.DESIGNER, new Date(), new Date(), true)
@@ -42,7 +42,7 @@ class ProfissionalControllerTest {
     }
 
     @Test
-    void testGetComFiltro() {
+    void testGetProfissionaisComFiltro() {
         var profissional1 = buildProfissional(1L, "Profissional Teste 1", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
 
         when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissional1));
@@ -54,7 +54,7 @@ class ProfissionalControllerTest {
     }
 
     @Test
-    void testGetComFieldsEscolhidos() {
+    void testGetProfissionaisComFieldsEscolhidos() {
         var profissional = Profissional.builder()
                 .nome("Profissional Teste")
                 .nascimento(new Date())
@@ -96,7 +96,7 @@ class ProfissionalControllerTest {
     }
 
     @Test
-    void testInsert() {
+    void testInsertProfissional() {
         var profissionalMock = buildProfissional(1L, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
         when(profissionalService.insert(any(Profissional.class))).thenReturn(profissionalMock);
 
@@ -108,7 +108,7 @@ class ProfissionalControllerTest {
     }
 
     @Test
-    void testUpdate() {
+    void testUpdateProfissionalById() {
         var idProfissional = 1L;
         var profissional = buildProfissional(idProfissional, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
         when(profissionalService.existsById(idProfissional)).thenReturn(true);
@@ -121,7 +121,7 @@ class ProfissionalControllerTest {
     }
 
     @Test
-    void testDelete() {
+    void testDeleteProfissionalById() {
         var response = profissionalController.delete(1L);
         var mensagemEsperada = Map.of("mensagem", "Sucesso profissional excluído");
 
