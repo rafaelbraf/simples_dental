@@ -26,7 +26,7 @@ public class ProfissionalService {
 
     public List<Profissional> searchAndFilterProfissionais(String query, List<String> fields) {
         var profissionais = profissionalRepository.findAll();
-        profissionais = filterProfissionaisByQuery(profissionais, query);
+        profissionais = filterUtils.filterObjectsByText(profissionais, query, this::extractProfissionalAttributes);
 
         if (!fields.isEmpty()) {
             profissionais = filterUtils.filterFields(profissionais, fields);
@@ -73,20 +73,9 @@ public class ProfissionalService {
         return profissionalRepository.existsById(id);
     }
 
-    private List<Profissional> filterProfissionaisByQuery(List<Profissional> profissionais, String query) {
-        if (isNull(query) || query.isEmpty()) {
-            return profissionais;
-        }
-
-        String queryLowerCase = query.toLowerCase();
-
-        return profissionais.stream()
-                .filter(profissional -> containsValueInAttributes(profissional, queryLowerCase))
-                .collect(Collectors.toList());
-    }
-
-    private boolean containsValueInAttributes(Profissional profissional, String value) {
-        return profissional.getNome().toLowerCase().contains(value) ||
-                profissional.getCargo().toString().toLowerCase().contains(value);
+    private String[] extractProfissionalAttributes(Profissional profissional) {
+        return new String[] {
+                profissional.getNome(), profissional.getCargo().toString(),
+        };
     }
 }

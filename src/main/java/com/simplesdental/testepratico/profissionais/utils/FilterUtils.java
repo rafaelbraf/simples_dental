@@ -6,8 +6,34 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 @Component
 public class FilterUtils<T> {
+
+    public List<T> filterObjectsByText(List<T> objects, String text, QueryAttributeExtractor<T> attributeExtractor) {
+        if (isNull(text) || text.isEmpty()) {
+            return objects;
+        }
+
+        String textLowerCase = text.toLowerCase();
+
+        return objects.stream()
+                .filter(object -> containsValueInAttributes(object, textLowerCase, attributeExtractor))
+                .collect(Collectors.toList());
+    }
+
+    private boolean containsValueInAttributes(T object, String value, QueryAttributeExtractor<T> attributeExtractor) {
+        String[] attributeValues = attributeExtractor.extractAttributes(object);
+
+        for (String attributeValue : attributeValues) {
+            if (attributeValue.toLowerCase().contains(value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public List<T> filterFields(List<T> objects, List<String> fields) {
         return objects.stream()
