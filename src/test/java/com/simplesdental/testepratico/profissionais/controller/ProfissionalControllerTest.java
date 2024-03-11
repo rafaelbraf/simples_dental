@@ -3,6 +3,7 @@ package com.simplesdental.testepratico.profissionais.controller;
 import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
 import com.simplesdental.testepratico.profissionais.model.Cargo;
 import com.simplesdental.testepratico.profissionais.model.Profissional;
+import com.simplesdental.testepratico.profissionais.model.ProfissionalRequestDto;
 import com.simplesdental.testepratico.profissionais.service.ProfissionalService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +80,7 @@ class ProfissionalControllerTest {
         var idProfissional = 1L;
         var profissionalMock = buildProfissional(idProfissional, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
 
-        when(profissionalService.getById(idProfissional)).thenReturn(Optional.of(profissionalMock));
+        when(profissionalService.getById(idProfissional)).thenReturn(profissionalMock);
 
         var response = profissionalController.getById(idProfissional);
 
@@ -88,28 +89,23 @@ class ProfissionalControllerTest {
     }
 
     @Test
-    void testGetById_ProfissionalNaoEncontrado() {
-        assertThrows(ResourceNotFoundException.class, () -> profissionalController.getById(1L));
-    }
-
-    @Test
     void testInsertProfissional() {
+        var profissionalInsert = buildProfissionalDTO("Profissional Teste", Cargo.DESENVOLVEDOR, new Date());
         var profissionalMock = buildProfissional(1L, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
-        when(profissionalService.insert(any(Profissional.class))).thenReturn(profissionalMock);
+        when(profissionalService.insert(any(ProfissionalRequestDto.class))).thenReturn(profissionalMock);
 
-        var response = profissionalController.insert(profissionalMock);
-        var mensagemEsperada = String.format("Sucesso profissional com id %s cadastrado", profissionalMock.getId());
+        var response = profissionalController.insert(profissionalInsert);
+        var mensagemKey = "mensagem";
+        var mensagemEsperadaMap = Map.of(mensagemKey, String.format("Profissional cadastrado com sucesso com id %s", profissionalMock.getId()));
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(mensagemEsperada, response.getBody().toString());
+        assertEquals(mensagemEsperadaMap.get(mensagemKey), response.getBody().get(mensagemKey));
     }
 
     @Test
     void testUpdateProfissionalById() {
         var idProfissional = 1L;
         var profissional = buildProfissional(idProfissional, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
-        when(profissionalService.existsById(idProfissional)).thenReturn(true);
-
         var response = profissionalController.update(idProfissional, profissional);
         var mensagemEsperada = Map.of("mensagem", "Profissional atualizado com sucesso!");
 
@@ -134,6 +130,14 @@ class ProfissionalControllerTest {
                 .nascimento(nascimento)
                 .createdDate(createdDate)
                 .ativo(ativo)
+                .build();
+    }
+
+    private ProfissionalRequestDto buildProfissionalDTO(String nome, Cargo cargo, Date nascimento) {
+        return ProfissionalRequestDto.builder()
+                .nome(nome)
+                .cargo(cargo)
+                .nascimento(nascimento)
                 .build();
     }
 }

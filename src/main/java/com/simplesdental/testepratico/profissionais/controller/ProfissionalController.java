@@ -2,9 +2,9 @@ package com.simplesdental.testepratico.profissionais.controller;
 
 import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
 import com.simplesdental.testepratico.profissionais.model.Profissional;
+import com.simplesdental.testepratico.profissionais.model.ProfissionalRequestDto;
 import com.simplesdental.testepratico.profissionais.service.ProfissionalService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,18 +31,18 @@ public class ProfissionalController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Profissional> getById(@PathVariable Long id) {
-        return profissionalService.getById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> ResourceNotFoundException.forResource("Profissional", id));
+        var profissional = profissionalService.getById(id);
+        return ResponseEntity.ok(profissional);
     }
 
     @PostMapping
-    public ResponseEntity<String> insert(@RequestBody Profissional profissional) {
+    public ResponseEntity<Map<String, String>> insert(@RequestBody ProfissionalRequestDto profissionalRequestDto) {
         try {
-            var profissionalCadastrado = profissionalService.insert(profissional);
-            var mensagem = String.format("Sucesso profissional com id %s cadastrado", profissionalCadastrado.getId());
+            var profissionalCadastrado = profissionalService.insert(profissionalRequestDto);
+            var mensagem = String.format("Profissional cadastrado com sucesso com id %s", profissionalCadastrado.getId());
+            var responseMap = Map.of("mensagem", mensagem);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(mensagem);
+            return ResponseEntity.status(HttpStatus.CREATED).body(responseMap);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -50,10 +50,6 @@ public class ProfissionalController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody Profissional profissional) {
-        if (!profissionalService.existsById(id)) {
-            throw ResourceNotFoundException.forResource("Profissional", id);
-        }
-
         try {
             profissionalService.update(id, profissional);
             return ResponseEntity.ok(Map.of("mensagem", "Profissional atualizado com sucesso!"));
