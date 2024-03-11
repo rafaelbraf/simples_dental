@@ -2,6 +2,8 @@ package com.simplesdental.testepratico.profissionais.controller;
 
 import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
 import com.simplesdental.testepratico.profissionais.model.Contato;
+import com.simplesdental.testepratico.profissionais.model.ContatoResponseDto;
+import com.simplesdental.testepratico.profissionais.model.ContatoRequestDto;
 import com.simplesdental.testepratico.profissionais.service.ContatoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,22 +25,21 @@ public class ContatoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Contato>> getAll() {
-        var contatos = contatoService.getAll();
+    public ResponseEntity<List<ContatoResponseDto>> getAll(@RequestParam String q, @RequestParam(required = false) List<String> fields) {
+        var contatos = contatoService.searchAndFilterContatos(q, fields);
         return ResponseEntity.ok(contatos);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Contato> getById(@PathVariable Long id) {
-        return contatoService.getById(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> ResourceNotFoundException.forResource("Contato", id));
+    public ResponseEntity<ContatoResponseDto> getById(@PathVariable Long id) {
+        var contato = contatoService.getById(id);
+        return ResponseEntity.ok(contato);
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> insert(@RequestBody Contato contato) {
+    public ResponseEntity<Map<String, String>> insert(@RequestBody ContatoRequestDto contatoRequestDto) {
         try {
-            var contatoCadastrado = contatoService.insert(contato);
+            var contatoCadastrado = contatoService.insert(contatoRequestDto);
             var mensagem = String.format("Contato cadastrado com sucesso para Profissional %s.", contatoCadastrado.getProfissional().getId());
             var retornoMap = Map.of("mensagem", mensagem);
 
@@ -49,13 +50,9 @@ public class ContatoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody Contato contato) {
-        if (!contatoService.existsById(id)) {
-            throw ResourceNotFoundException.forResource("Contato", id);
-        }
-
+    public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody ContatoRequestDto contatoRequestDto) {
         try {
-            contatoService.update(id, contato);
+            contatoService.update(id, contatoRequestDto);
             return ResponseEntity.ok(Map.of("mensagem", "Contato atualizado com sucesso!"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
