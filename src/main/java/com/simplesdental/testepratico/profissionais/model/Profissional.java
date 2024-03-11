@@ -40,7 +40,8 @@ public class Profissional implements Serializable {
     @Column(name = "created_date")
     private Date createdDate;
 
-    @Column
+    @Column(name = "ativo")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     private boolean ativo;
 
     @OneToMany(mappedBy = "profissional", cascade = CascadeType.ALL)

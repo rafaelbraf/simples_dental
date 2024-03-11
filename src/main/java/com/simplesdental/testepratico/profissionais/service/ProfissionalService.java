@@ -46,7 +46,7 @@ public class ProfissionalService {
         return profissionalRepository.save(profissional);
     }
 
-    public void update(Long id, Profissional profissionalRequest) {
+    public void update(Long id, ProfissionalRequestDto profissionalRequest) {
         var profissional = findProfissionalById(id);
         profissional.setNome(profissionalRequest.getNome());
         profissional.setCargo(profissionalRequest.getCargo());
@@ -73,7 +73,8 @@ public class ProfissionalService {
 
     private String[] extractProfissionalAttributes(Profissional profissional) {
         return new String[] {
-                profissional.getNome(), profissional.getCargo().toString(),
+                profissional.getId().toString(), profissional.getNome(), profissional.getCargo().toString(), profissional.getNascimento().toString(), profissional.getCreatedDate().toString(),
+                profissional.getContatos().toString(), String.valueOf(profissional.isAtivo())
         };
     }
 

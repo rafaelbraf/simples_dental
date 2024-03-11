@@ -49,9 +49,9 @@ public class ProfissionalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody Profissional profissional) {
+    public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody ProfissionalRequestDto profissionalRequestDto) {
         try {
-            profissionalService.update(id, profissional);
+            profissionalService.update(id, profissionalRequestDto);
             return ResponseEntity.ok(Map.of("mensagem", "Profissional atualizado com sucesso!"));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

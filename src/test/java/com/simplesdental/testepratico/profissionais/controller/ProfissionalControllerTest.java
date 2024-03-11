@@ -1,6 +1,5 @@
 package com.simplesdental.testepratico.profissionais.controller;
 
-import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
 import com.simplesdental.testepratico.profissionais.model.Cargo;
 import com.simplesdental.testepratico.profissionais.model.Profissional;
 import com.simplesdental.testepratico.profissionais.model.ProfissionalRequestDto;
@@ -90,7 +89,7 @@ class ProfissionalControllerTest {
 
     @Test
     void testInsertProfissional() {
-        var profissionalInsert = buildProfissionalDTO("Profissional Teste", Cargo.DESENVOLVEDOR, new Date());
+        var profissionalInsert = buildProfissionalRequestDTO("Profissional Teste", Cargo.DESENVOLVEDOR, new Date());
         var profissionalMock = buildProfissional(1L, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
         when(profissionalService.insert(any(ProfissionalRequestDto.class))).thenReturn(profissionalMock);
 
@@ -105,8 +104,8 @@ class ProfissionalControllerTest {
     @Test
     void testUpdateProfissionalById() {
         var idProfissional = 1L;
-        var profissional = buildProfissional(idProfissional, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
-        var response = profissionalController.update(idProfissional, profissional);
+        var profissionalRequestDto = buildProfissionalRequestDTO("Profissional Teste", Cargo.DESENVOLVEDOR, new Date());
+        var response = profissionalController.update(idProfissional, profissionalRequestDto);
         var mensagemEsperada = Map.of("mensagem", "Profissional atualizado com sucesso!");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -133,7 +132,7 @@ class ProfissionalControllerTest {
                 .build();
     }
 
-    private ProfissionalRequestDto buildProfissionalDTO(String nome, Cargo cargo, Date nascimento) {
+    private ProfissionalRequestDto buildProfissionalRequestDTO(String nome, Cargo cargo, Date nascimento) {
         return ProfissionalRequestDto.builder()
                 .nome(nome)
                 .cargo(cargo)
