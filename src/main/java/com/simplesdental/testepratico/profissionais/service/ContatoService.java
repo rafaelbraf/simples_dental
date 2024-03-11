@@ -43,14 +43,8 @@ public class ContatoService {
     }
 
     public ContatoResponseDto getById(Long id) {
-        var contato = contatoRepository.findById(id);
-        if (!contato.isPresent()) {
-            throw ResourceNotFoundException.forResource("Contato", id);
-        }
-
-        var contatoResponseDto = contato.get().toContatoResponseDto();
-
-        return contatoResponseDto;
+        var contato = findContatoById(id);
+        return contato.toContatoResponseDto();
     }
 
     public ContatoResponseDto insert(ContatoRequestDto contatoRequestDto) {
@@ -61,12 +55,7 @@ public class ContatoService {
     }
 
     public void update(Long id, ContatoRequestDto contatoRequestDto) {
-        var contatoCadastrado = contatoRepository.findById(id);
-        if (!contatoCadastrado.isPresent()) {
-            throw ResourceNotFoundException.forResource("Contato", id);
-        }
-
-        var contato = contatoCadastrado.get();
+        var contato = findContatoById(id);
         contato.setNome(contatoRequestDto.getNome());
 
         contatoRepository.save(contato);
@@ -78,7 +67,14 @@ public class ContatoService {
 
     private String[] extractContatoAttributes(Contato contato) {
         return new String[] {
-                contato.getNome()
+                contato.getNome(), contato.getProfissional().getNome(), contato.getCreatedDate().toString(), contato.getId().toString()
         };
+    }
+
+    private Contato findContatoById(Long id) {
+        var contato = contatoRepository.findById(id)
+                .orElseThrow(() -> ResourceNotFoundException.forResource("Contato", id));
+
+        return contato;
     }
 }

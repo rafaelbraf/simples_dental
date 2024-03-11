@@ -93,15 +93,6 @@ public class ContatoControllerTest {
         assertEquals(mensagemEsperada, response.getBody());
     }
 
-    private Contato buildContato(Long id, String nome, Date createdDate, Profissional profissional) {
-        return Contato.builder()
-                .id(id)
-                .nome(nome)
-                .createdDate(createdDate)
-                .profissional(profissional)
-                .build();
-    }
-
     private ContatoRequestDto buildContatoRequestDto(String nome, Profissional profissional) {
         return ContatoRequestDto.builder()
                 .nome(nome)
