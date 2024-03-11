@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Component
 public class FilterUtils<T> {
@@ -27,7 +28,7 @@ public class FilterUtils<T> {
         String[] attributeValues = attributeExtractor.extractAttributes(object);
 
         for (String attributeValue : attributeValues) {
-            if (attributeValue.toLowerCase().contains(value)) {
+            if (nonNull(attributeValue) && attributeValue.toLowerCase().contains(value)) {
                 return true;
             }
         }
