@@ -1,5 +1,6 @@
 package com.simplesdental.testepratico.profissionais.controller;
 
+import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
 import com.simplesdental.testepratico.profissionais.model.Cargo;
 import com.simplesdental.testepratico.profissionais.model.Contato;
 import com.simplesdental.testepratico.profissionais.model.Profissional;
@@ -16,8 +17,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -63,10 +63,7 @@ public class ContatoControllerTest {
 
     @Test
     void testGetById_ContatoNaoEncontrado() {
-        var response = contatoController.getById(1L);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        assertThrows(ResourceNotFoundException.class, () -> contatoController.getById(1L));
     }
 
     @Test
@@ -77,7 +74,7 @@ public class ContatoControllerTest {
         when(contatoService.insert(any(Contato.class))).thenReturn(contatoMock);
 
         var response = contatoController.insert(contatoMock);
-        var mensagemEsperada = String.format("Contato cadastrado com sucesso para usuário %s.", contatoMock.getProfissional().getId());
+        var mensagemEsperada = String.format("Contato cadastrado com sucesso para Profissional %s.", contatoMock.getProfissional().getId());
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(mensagemEsperada, response.getBody().get("mensagem"));

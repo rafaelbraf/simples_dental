@@ -1,5 +1,6 @@
 package com.simplesdental.testepratico.profissionais.controller;
 
+import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
 import com.simplesdental.testepratico.profissionais.model.Contato;
 import com.simplesdental.testepratico.profissionais.service.ContatoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,32 +32,43 @@ public class ContatoController {
     public ResponseEntity<Contato> getById(@PathVariable Long id) {
         return contatoService.getById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> ResourceNotFoundException.forResource("Contato", id));
     }
 
     @PostMapping
     public ResponseEntity<Map<String, String>> insert(@RequestBody Contato contato) {
-        var contatoCadastrado = contatoService.insert(contato);
-        var mensagem = String.format("Contato cadastrado com sucesso para usuário %s.", contatoCadastrado.getProfissional().getId());
-        var retornoMap = Map.of("mensagem", mensagem);
+        try {
+            var contatoCadastrado = contatoService.insert(contato);
+            var mensagem = String.format("Contato cadastrado com sucesso para Profissional %s.", contatoCadastrado.getProfissional().getId());
+            var retornoMap = Map.of("mensagem", mensagem);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(retornoMap);
+            return ResponseEntity.status(HttpStatus.CREATED).body(retornoMap);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody Contato contato) {
         if (!contatoService.existsById(id)) {
-            return ResponseEntity.notFound().build();
+            throw ResourceNotFoundException.forResource("Contato", id);
         }
 
-        contatoService.update(id, contato);
-        return ResponseEntity.ok(Map.of("mensagem", "Contato atualizado com sucesso!"));
+        try {
+            contatoService.update(id, contato);
+            return ResponseEntity.ok(Map.of("mensagem", "Contato atualizado com sucesso!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
-        contatoService.delete(id);
-        return ResponseEntity.ok(Map.of("mensagem", "Contato excluído!"));
+        try {
+            contatoService.delete(id);
+            return ResponseEntity.ok(Map.of("mensagem", "Contato excluído!"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
-
 }
