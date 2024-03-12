@@ -4,6 +4,7 @@ import com.simplesdental.testepratico.profissionais.model.Cargo;
 import com.simplesdental.testepratico.profissionais.model.Profissional;
 import com.simplesdental.testepratico.profissionais.model.ProfissionalRequestDto;
 import com.simplesdental.testepratico.profissionais.service.ProfissionalService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,7 +14,8 @@ import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -21,15 +23,26 @@ import static org.mockito.Mockito.when;
 class ProfissionalControllerTest {
 
     @InjectMocks
-    ProfissionalController profissionalController;
+    private ProfissionalController profissionalController;
 
     @Mock
-    ProfissionalService profissionalService;
+    private ProfissionalService profissionalService;
+
+    private Profissional profissional;
+    private ProfissionalRequestDto profissionalRequestDto;
+    private Date nascimento;
+
+    @BeforeEach
+    void setup() {
+        nascimento = new Date();
+        profissional = buildProfissional(1L, "Profissional Teste 1", Cargo.DESENVOLVEDOR, nascimento, new Date(), true);
+        profissionalRequestDto = buildProfissionalRequestDTO("Profissional Teste", Cargo.DESENVOLVEDOR, new Date());
+    }
 
     @Test
     void testGetAllProfissionais() {
         var profissionaisMock = Arrays.asList(
-                buildProfissional(1L, "Profissional Teste 1", Cargo.DESENVOLVEDOR, new Date(), new Date(), true),
+                profissional,
                 buildProfissional(2L, "Profissional Teste 2", Cargo.DESIGNER, new Date(), new Date(), true)
         );
 
@@ -43,24 +56,18 @@ class ProfissionalControllerTest {
 
     @Test
     void testGetProfissionaisComFiltro() {
-        var profissional1 = buildProfissional(1L, "Profissional Teste 1", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
-
-        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissional1));
+        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissional));
 
         var response = profissionalController.getAll("desenvolvedor", Collections.emptyList());
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(profissional1.getId(), response.getBody().get(0).getId());
+        assertEquals(profissional.getId(), response.getBody().get(0).getId());
     }
 
     @Test
     void testGetProfissionaisComFieldsEscolhidos() {
-        var profissional = Profissional.builder()
-                .nome("Profissional Teste")
-                .nascimento(new Date())
-                .build();
-
-        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissional));
+        var profissionalMock = buildProfissional(null, "Profissional Teste 1", null, nascimento, null, false);
+        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissionalMock));
 
         var response = profissionalController.getAll("", List.of("nome", "nascimento"));
         var profissionalResponse = response.getBody().get(0);
@@ -76,26 +83,21 @@ class ProfissionalControllerTest {
 
     @Test
     void testGetById_ProfissionalEncontrado() {
-        var idProfissional = 1L;
-        var profissionalMock = buildProfissional(idProfissional, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
+        when(profissionalService.getById(anyLong())).thenReturn(profissional);
 
-        when(profissionalService.getById(idProfissional)).thenReturn(profissionalMock);
-
-        var response = profissionalController.getById(idProfissional);
+        var response = profissionalController.getById(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(profissionalMock.getId(), response.getBody().getId());
+        assertEquals(profissional.getId(), response.getBody().getId());
     }
 
     @Test
     void testInsertProfissional() {
-        var profissionalInsert = buildProfissionalRequestDTO("Profissional Teste", Cargo.DESENVOLVEDOR, new Date());
-        var profissionalMock = buildProfissional(1L, "Profissional Teste", Cargo.DESENVOLVEDOR, new Date(), new Date(), true);
-        when(profissionalService.insert(any(ProfissionalRequestDto.class))).thenReturn(profissionalMock);
+        when(profissionalService.insert(any(ProfissionalRequestDto.class))).thenReturn(profissional);
 
-        var response = profissionalController.insert(profissionalInsert);
+        var response = profissionalController.insert(profissionalRequestDto);
         var mensagemKey = "mensagem";
-        var mensagemEsperadaMap = Map.of(mensagemKey, String.format("Profissional cadastrado com sucesso com id %s", profissionalMock.getId()));
+        var mensagemEsperadaMap = Map.of(mensagemKey, String.format("Profissional cadastrado com sucesso com id %s", profissional.getId()));
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(mensagemEsperadaMap.get(mensagemKey), response.getBody().get(mensagemKey));
@@ -103,9 +105,7 @@ class ProfissionalControllerTest {
 
     @Test
     void testUpdateProfissionalById() {
-        var idProfissional = 1L;
-        var profissionalRequestDto = buildProfissionalRequestDTO("Profissional Teste", Cargo.DESENVOLVEDOR, new Date());
-        var response = profissionalController.update(idProfissional, profissionalRequestDto);
+        var response = profissionalController.update(1L, profissionalRequestDto);
         var mensagemEsperada = Map.of("mensagem", "Profissional atualizado com sucesso!");
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
