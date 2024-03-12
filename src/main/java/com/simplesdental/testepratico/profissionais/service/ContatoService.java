@@ -72,9 +72,7 @@ public class ContatoService {
     }
 
     private Contato findContatoById(Long id) {
-        var contato = contatoRepository.findById(id)
+        return contatoRepository.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.forResource("Contato", id));
-
-        return contato;
     }
 }

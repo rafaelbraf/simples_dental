@@ -5,6 +5,7 @@ import com.simplesdental.testepratico.profissionais.model.Contato;
 import com.simplesdental.testepratico.profissionais.model.ContatoResponseDto;
 import com.simplesdental.testepratico.profissionais.model.ContatoRequestDto;
 import com.simplesdental.testepratico.profissionais.service.ContatoService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class ContatoController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> insert(@RequestBody ContatoRequestDto contatoRequestDto) {
+    public ResponseEntity<Map<String, String>> insert(@RequestBody @Valid ContatoRequestDto contatoRequestDto) {
         try {
             var contatoCadastrado = contatoService.insert(contatoRequestDto);
             var mensagem = String.format("Contato cadastrado com sucesso para Profissional %s.", contatoCadastrado.getProfissional().getId());
@@ -50,7 +51,7 @@ public class ContatoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody ContatoRequestDto contatoRequestDto) {
+    public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @Valid @RequestBody ContatoRequestDto contatoRequestDto) {
         try {
             contatoService.update(id, contatoRequestDto);
             return ResponseEntity.ok(Map.of("mensagem", "Contato atualizado com sucesso!"));

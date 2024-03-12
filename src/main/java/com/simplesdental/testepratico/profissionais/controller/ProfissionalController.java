@@ -4,9 +4,11 @@ import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundEx
 import com.simplesdental.testepratico.profissionais.model.Profissional;
 import com.simplesdental.testepratico.profissionais.model.ProfissionalRequestDto;
 import com.simplesdental.testepratico.profissionais.service.ProfissionalService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,7 +38,7 @@ public class ProfissionalController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> insert(@RequestBody ProfissionalRequestDto profissionalRequestDto) {
+    public ResponseEntity<Map<String, String>> insert(@Valid @RequestBody ProfissionalRequestDto profissionalRequestDto) {
         try {
             var profissionalCadastrado = profissionalService.insert(profissionalRequestDto);
             var mensagem = String.format("Profissional cadastrado com sucesso com id %s", profissionalCadastrado.getId());
@@ -49,7 +51,7 @@ public class ProfissionalController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @RequestBody ProfissionalRequestDto profissionalRequestDto) {
+    public ResponseEntity<Map<String, String>> update(@PathVariable Long id, @Valid @RequestBody ProfissionalRequestDto profissionalRequestDto) {
         try {
             profissionalService.update(id, profissionalRequestDto);
             return ResponseEntity.ok(Map.of("mensagem", "Profissional atualizado com sucesso!"));
