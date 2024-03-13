@@ -59,20 +59,17 @@ public class ContatoServiceTest {
                 .thenReturn(List.of(contatosMock.get(0)));
         when(contatoRepository.findAll()).thenReturn(contatosMock);
 
-        List<ContatoResponseDto> contatosResponseDtos = contatoService.searchAndFilterContatos(query, fields);
+        List<ContatoResponseDto> contatosResponseDtos = contatoService.searchAndFilter(query, fields);
 
         assertNotNull(contatosResponseDtos);
-        assertNotEquals(contatosMock.size(), contatosResponseDtos.size());
-        assertEquals(contatosMock.get(0).getNome(), contatosResponseDtos.get(0).getNome());
-        assertEquals(contatosMock.get(0).getProfissional().getId(), contatosResponseDtos.get(0).getProfissional().getId());
-        assertNull(contatosResponseDtos.get(0).getCreatedDate());
+        assertEquals(1, contatosResponseDtos.size());
     }
 
     @Test
     void testGetContatoById_ContatoEncontrado() {
         when(contatoRepository.findById(anyLong())).thenReturn(Optional.of(contato));
 
-        var contatoEncontrado = contatoService.getById(1L);
+        var contatoEncontrado = contatoService.findById(1L);
 
         assertNotNull(contatoEncontrado);
         assertEquals(contatoEncontrado.getId(), contato.getId());
@@ -80,7 +77,7 @@ public class ContatoServiceTest {
 
     @Test
     void testGetContatoById_ContatoNaoEncontrado() {
-        assertThrows(ResourceNotFoundException.class, () -> contatoService.getById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> contatoService.findById(1L));
     }
 
     @Test

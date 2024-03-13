@@ -11,13 +11,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
-public class ContatoService {
+public class ContatoService implements SearchAndFilterInterface<ContatoResponseDto> {
 
     private final ContatoRepository contatoRepository;
-    private final FilterUtils<Contato> filterUtils;
+    private final FilterUtils<ContatoResponseDto> filterUtils;
 
     @Autowired
     public ContatoService(ContatoRepository contatoRepository, FilterUtils filterUtils) {
@@ -25,25 +24,10 @@ public class ContatoService {
         this.filterUtils = filterUtils;
     }
 
-    public List<ContatoResponseDto> searchAndFilterContatos(String query, List<String> fields) {
-        var contatos = contatoRepository.findAll();
-        contatos = filterUtils.filterObjectsByText(contatos, query, this::extractContatoAttributes);
+    public ContatoResponseDto findById(Long id) {
+        var contato = contatoRepository.findById(id)
+                .orElseThrow(() -> ResourceNotFoundException.forResource("Contato", id));
 
-        if (!fields.isEmpty()) {
-            contatos = filterUtils.filterFields(contatos, fields);
-        }
-
-        var contatosResponseDtos = new ArrayList<ContatoResponseDto>();
-
-        for (Contato contato : contatos) {
-            contatosResponseDtos.add(contato.toContatoResponseDto());
-        }
-
-        return contatosResponseDtos;
-    }
-
-    public ContatoResponseDto getById(Long id) {
-        var contato = findContatoById(id);
         return contato.toContatoResponseDto();
     }
 
@@ -74,5 +58,36 @@ public class ContatoService {
     private Contato findContatoById(Long id) {
         return contatoRepository.findById(id)
                 .orElseThrow(() -> ResourceNotFoundException.forResource("Contato", id));
+    }
+
+    @Override
+    public List<ContatoResponseDto> searchAndFilter(String query, List<String> fields) {
+        var contatos = contatoRepository.findAll();
+        var contatosResponseDtos = convertContatosToContatosResponseDto(contatos);
+
+        contatosResponseDtos = filterUtils.filterObjectsByText(contatosResponseDtos, query, this::extractObjectAttributes);
+
+        if (!fields.isEmpty()) {
+            contatosResponseDtos = filterUtils.filterFields(contatosResponseDtos, fields);
+        }
+
+        return contatosResponseDtos;
+    }
+
+    @Override
+    public String[] extractObjectAttributes(ContatoResponseDto contato) {
+        return new String[] {
+                contato.getNome(), contato.getProfissional().getNome(), contato.getCreatedDate().toString(), contato.getId().toString()
+        };
+    }
+
+    private List<ContatoResponseDto> convertContatosToContatosResponseDto(List<Contato> contatos) {
+        List<ContatoResponseDto> contatosResponseDtos = new ArrayList<>();
+
+        for (var contato : contatos) {
+            contatosResponseDtos.add(contato.toContatoResponseDto());
+        }
+
+        return contatosResponseDtos;
     }
 }

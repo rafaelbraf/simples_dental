@@ -27,13 +27,13 @@ public class ProfissionalController {
 
     @GetMapping
     public ResponseEntity<List<Profissional>> getAll(@RequestParam String q, @RequestParam(required = false) List<String> fields) {
-        var profissionais = profissionalService.searchAndFilterProfissionais(q, fields);
+        var profissionais = profissionalService.searchAndFilter(q, fields);
         return ResponseEntity.ok(profissionais);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Profissional> getById(@PathVariable Long id) {
-        var profissional = profissionalService.getById(id);
+        var profissional = profissionalService.findById(id);
         return ResponseEntity.ok(profissional);
     }
 

@@ -1,7 +1,5 @@
 package com.simplesdental.testepratico.profissionais.controller;
 
-import com.simplesdental.testepratico.profissionais.exception.ResourceNotFoundException;
-import com.simplesdental.testepratico.profissionais.model.Contato;
 import com.simplesdental.testepratico.profissionais.model.ContatoResponseDto;
 import com.simplesdental.testepratico.profissionais.model.ContatoRequestDto;
 import com.simplesdental.testepratico.profissionais.service.ContatoService;
@@ -27,13 +25,13 @@ public class ContatoController {
 
     @GetMapping
     public ResponseEntity<List<ContatoResponseDto>> getAll(@RequestParam String q, @RequestParam(required = false) List<String> fields) {
-        var contatos = contatoService.searchAndFilterContatos(q, fields);
+        var contatos = contatoService.searchAndFilter(q, fields);
         return ResponseEntity.ok(contatos);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ContatoResponseDto> getById(@PathVariable Long id) {
-        var contato = contatoService.getById(id);
+        var contato = contatoService.findById(id);
         return ResponseEntity.ok(contato);
     }
 

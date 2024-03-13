@@ -60,7 +60,7 @@ public class ProfissionalServiceTest {
                 .thenReturn(List.of(profissionaisMock.get(0)));
         when(profissionalRepository.findAll()).thenReturn(profissionaisMock);
 
-        List<Profissional> profissionaisFiltrados = profissionalService.searchAndFilterProfissionais(query, fields);
+        List<Profissional> profissionaisFiltrados = profissionalService.searchAndFilter(query, fields);
 
         assertNotNull(profissionaisFiltrados);
         assertNotEquals(profissionaisMock.size(), profissionaisFiltrados.size());
@@ -73,7 +73,7 @@ public class ProfissionalServiceTest {
     void testGetProfissionalById_ProfissionalEncontrado() {
         when(profissionalRepository.findById(anyLong())).thenReturn(Optional.of(profissional));
 
-        var profissionalEncontrado = profissionalService.getById(1L);
+        var profissionalEncontrado = profissionalService.findById(1L);
 
         assertNotNull(profissionalEncontrado);
         assertEquals(profissional.getId(), profissionalEncontrado.getId());
@@ -81,7 +81,7 @@ public class ProfissionalServiceTest {
 
     @Test
     void testGetProfissionalById_ProfissionalNaoEncontrado() {
-        assertThrows(ResourceNotFoundException.class, () -> profissionalService.getById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> profissionalService.findById(1L));
     }
 
     @Test

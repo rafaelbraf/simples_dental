@@ -46,7 +46,7 @@ class ProfissionalControllerTest {
                 buildProfissional(2L, "Profissional Teste 2", Cargo.DESIGNER, new Date(), new Date(), true)
         );
 
-        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(profissionaisMock);
+        when(profissionalService.searchAndFilter(anyString(), anyList())).thenReturn(profissionaisMock);
 
         var response = profissionalController.getAll("", Collections.emptyList());
 
@@ -56,7 +56,7 @@ class ProfissionalControllerTest {
 
     @Test
     void testGetProfissionaisComFiltro() {
-        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissional));
+        when(profissionalService.searchAndFilter(anyString(), anyList())).thenReturn(List.of(profissional));
 
         var response = profissionalController.getAll("desenvolvedor", Collections.emptyList());
 
@@ -67,7 +67,7 @@ class ProfissionalControllerTest {
     @Test
     void testGetProfissionaisComFieldsEscolhidos() {
         var profissionalMock = buildProfissional(null, "Profissional Teste 1", null, nascimento, null, false);
-        when(profissionalService.searchAndFilterProfissionais(anyString(), anyList())).thenReturn(List.of(profissionalMock));
+        when(profissionalService.searchAndFilter(anyString(), anyList())).thenReturn(List.of(profissionalMock));
 
         var response = profissionalController.getAll("", List.of("nome", "nascimento"));
         var profissionalResponse = response.getBody().get(0);
@@ -83,7 +83,7 @@ class ProfissionalControllerTest {
 
     @Test
     void testGetById_ProfissionalEncontrado() {
-        when(profissionalService.getById(anyLong())).thenReturn(profissional);
+        when(profissionalService.findById(anyLong())).thenReturn(profissional);
 
         var response = profissionalController.getById(1L);
 

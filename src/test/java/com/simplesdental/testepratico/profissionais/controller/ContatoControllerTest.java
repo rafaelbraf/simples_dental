@@ -49,7 +49,7 @@ public class ContatoControllerTest {
                 buildContatoResponseDto(2L, "Contato 2", new Date(), profissional)
         );
 
-        when(contatoService.searchAndFilterContatos(anyString(), anyList())).thenReturn(contatosReponseDtos);
+        when(contatoService.searchAndFilter(anyString(), anyList())).thenReturn(contatosReponseDtos);
 
         var response = contatoController.getAll("", Collections.emptyList());
 
@@ -60,7 +60,7 @@ public class ContatoControllerTest {
 
     @Test
     void testGetById_ContatoEncontrado() {
-        when(contatoService.getById(anyLong())).thenReturn(contatoResponseDto);
+        when(contatoService.findById(anyLong())).thenReturn(contatoResponseDto);
 
         var response = contatoController.getById(1L);
 
