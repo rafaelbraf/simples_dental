@@ -39,7 +39,8 @@ public class ContatoService implements SearchAndFilterInterface<ContatoResponseD
     }
 
     public void update(Long id, ContatoRequestDto contatoRequestDto) {
-        var contato = findContatoById(id);
+        var contato = contatoRepository.findById(id)
+                .orElseThrow(() -> ResourceNotFoundException.forResource("Contato", id));
         contato.setNome(contatoRequestDto.getNome());
 
         contatoRepository.save(contato);
@@ -47,17 +48,6 @@ public class ContatoService implements SearchAndFilterInterface<ContatoResponseD
 
     public void delete(Long id) {
         contatoRepository.deleteById(id);
-    }
-
-    private String[] extractContatoAttributes(Contato contato) {
-        return new String[] {
-                contato.getNome(), contato.getProfissional().getNome(), contato.getCreatedDate().toString(), contato.getId().toString()
-        };
-    }
-
-    private Contato findContatoById(Long id) {
-        return contatoRepository.findById(id)
-                .orElseThrow(() -> ResourceNotFoundException.forResource("Contato", id));
     }
 
     @Override
